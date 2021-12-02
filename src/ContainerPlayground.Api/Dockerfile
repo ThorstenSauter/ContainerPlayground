@@ -5,10 +5,9 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["src/ContainerPlayground.Api/ContainerPlayground.Api.csproj", "ContainerPlayground.Api/"]
-RUN dotnet restore "src/ContainerPlayground.Api/ContainerPlayground.Api.csproj"
+COPY ["ContainerPlayground.Api.csproj", "."]
+RUN dotnet restore "ContainerPlayground.Api.csproj"
 COPY . .
-WORKDIR "/src/ContainerPlayground.Api"
 RUN dotnet build "ContainerPlayground.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
