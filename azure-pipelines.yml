@@ -1,0 +1,55 @@
+trigger:
+- main
+
+variables:
+  image: 'ubuntu-latest'
+  dockerRegistryServiceConnection: 'container-playground-registry'
+  containerRegistry: 'containerplayground.azurecr.io'
+  imageRepository: 'containerplayground-api'
+  dockerfilePath: 'src/ContainerPlayground.Api/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+pool:
+  vmImage: $(image)
+
+stages:
+  - stage: Build
+    displayName: 'Build and push stage'
+    jobs:  
+    - job: Build
+      displayName: Build job
+      pool:
+        vmImage: $(image)
+      steps:
+      - task: Docker@2
+        displayName: Build and push an image to container registry
+        inputs:
+          command: buildAndPush
+          repository: $(imageRepository)
+          dockerfile: $(dockerfilePath)
+          containerRegistry: $(dockerRegistryServiceConnection)
+          tags: |
+            $(tag)
+  - stage: Production
+    dependsOn: Build
+    displayName: 'Deploy to production environment'
+    jobs:
+      - deployment: Deploy
+        displayName: 'Deploy to Azure App Service'
+        environment: 'Production'
+        pool:
+          vmImage: $(image)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureRmWebAppDeployment@4
+                  displayName: 'Deploy container to App Service'
+                  inputs:
+                    ConnectionType: 'AzureRM'
+                    azureSubscription: 'container-playground'
+                    appType: 'webAppContainer'
+                    WebAppName: 'containerplayground'
+                    DockerNamespace: '$(containerRegistry)'
+                    DockerRepository: '$(imageRepository)'
+                    DockerImageTag: '$(tag)'
