@@ -1,4 +1,4 @@
-namespace ContainerPlayground.Api;
+namespace ContainerPlayground.Api.Models;
 
 public class WeatherForecast
 {
