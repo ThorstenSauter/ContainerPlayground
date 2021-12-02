@@ -1,7 +1,5 @@
 using ContainerPlayground.Api.Controllers;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 
 namespace ContainerPlayground.Api.Tests.Unit;
 
