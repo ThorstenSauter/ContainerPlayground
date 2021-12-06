@@ -1,7 +1,5 @@
 trigger:
-  - main
-
-pr: none
+- main
 
 variables:
   image: 'ubuntu-latest'
