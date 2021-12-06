@@ -33,7 +33,7 @@ stages:
               dockerfile: '$(dockerfilePath)'
               containerRegistry: '$(dockerRegistryServiceConnection)'
               tags: |
-                '$(tag)'
+                $(tag)
   - stage: Production
     dependsOn: Build
     displayName: 'Deploy to production environment'
