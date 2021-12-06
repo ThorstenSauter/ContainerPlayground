@@ -17,21 +17,21 @@ pool:
 stages:
   - stage: Build
     displayName: 'Build and push stage'
-    jobs:  
-    - job: Build
-      displayName: Build job
-      pool:
-        vmImage: $(image)
-      steps:
-      - task: Docker@2
-        displayName: Build and push an image to container registry
-        inputs:
-          command: buildAndPush
-          repository: $(imageRepository)
-          dockerfile: $(dockerfilePath)
-          containerRegistry: $(dockerRegistryServiceConnection)
-          tags: |
-            $(tag)
+    jobs:
+      - job: Build
+        displayName: Build job
+        pool:
+          vmImage: $(image)
+        steps:
+          - task: Docker@2
+            displayName: Build and push an image to container registry
+            inputs:
+              command: buildAndPush
+              repository: $(imageRepository)
+              dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(tag)
   - stage: Production
     dependsOn: Build
     displayName: 'Deploy to production environment'
@@ -45,13 +45,8 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: AzureRmWebAppDeployment@4
-                  displayName: 'Deploy container to App Service'
+                - task: AzureWebAppContainer@1
                   inputs:
-                    ConnectionType: 'AzureRM'
                     azureSubscription: 'container-playground'
-                    appType: 'webAppContainer'
-                    WebAppName: 'containerplayground'
-                    DockerNamespace: '$(containerRegistry)'
-                    DockerRepository: '$(imageRepository)'
-                    DockerImageTag: '$(tag)'
+                    appName: 'containerplayground'
+                    containers: '$(containerRegistry)/$(imageRepository):$(tag)'
