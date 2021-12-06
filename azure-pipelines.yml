@@ -6,6 +6,8 @@ pr: none
 variables:
   image: 'ubuntu-latest'
   dockerRegistryServiceConnection: 'container-playground-registry'
+  armServiceConnection: 'container-playground'
+  appServiceName: 'containerplayground'
   containerRegistry: 'containerplayground.azurecr.io'
   imageRepository: 'containerplayground-api'
   dockerfilePath: 'src/ContainerPlayground.Api/Dockerfile'
@@ -19,19 +21,19 @@ stages:
     displayName: 'Build and push stage'
     jobs:
       - job: Build
-        displayName: Build job
+        displayName: 'Build job'
         pool:
-          vmImage: $(image)
+          vmImage: '$(image)'
         steps:
           - task: Docker@2
-            displayName: Build and push an image to container registry
+            displayName: 'Build and push the app image to container registry'
             inputs:
-              command: buildAndPush
-              repository: $(imageRepository)
-              dockerfile: $(dockerfilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
+              command: 'buildAndPush'
+              repository: '$(imageRepository)'
+              dockerfile: '$(dockerfilePath)'
+              containerRegistry: '$(dockerRegistryServiceConnection)'
               tags: |
-                $(tag)
+                '$(tag)'
   - stage: Production
     dependsOn: Build
     displayName: 'Deploy to production environment'
@@ -40,13 +42,14 @@ stages:
         displayName: 'Deploy to Azure App Service'
         environment: 'Production'
         pool:
-          vmImage: $(image)
+          vmImage: '$(image)'
         strategy:
           runOnce:
             deploy:
               steps:
                 - task: AzureWebAppContainer@1
+                  displayName: 'Deploy to Azure App Service production slot'
                   inputs:
-                    azureSubscription: 'container-playground'
-                    appName: 'containerplayground'
+                    azureSubscription: '$(armServiceConnection)'
+                    appName: '$(appServiceName)'
                     containers: '$(containerRegistry)/$(imageRepository):$(tag)'
